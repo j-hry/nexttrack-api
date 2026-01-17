@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.routers import recommend
 
 
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(recommend.router, prefix="/api/v1")
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 @app.get("/")

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NextTrack</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>NextTrack</h1>
+        <p class="subtitle">
+          Stateless music recommendations — no accounts, no tracking
+        </p>
+      </header>
+
+      <!-- User Input Section -->
+      <section id="input-section">
+        <h2>Your Listening History</h2>
+        <p class="hint">Ordered from oldest to most recent (the last track has the most influence)</p>
+        <div id="track-rows">
+          <div class="track-row">
+            <input
+              type="text"
+              class="artist-input"
+              placeholder="Artist"
+              required
+            />
+            <input
+              type="text"
+              class="track-input"
+              placeholder="Track"
+              required
+            />
+            <button type="button" class="remove-row-btn" disabled>✕</button>
+          </div>
+          <div class="track-row">
+            <input
+              type="text"
+              class="artist-input"
+              placeholder="Artist"
+              required
+            />
+            <input
+              type="text"
+              class="track-input"
+              placeholder="Track"
+              required
+            />
+            <button type="button" class="remove-row-btn" disabled>✕</button>
+          </div>
+          <div class="track-row">
+            <input
+              type="text"
+              class="artist-input"
+              placeholder="Artist"
+              required
+            />
+            <input
+              type="text"
+              class="track-input"
+              placeholder="Track"
+              required
+            />
+            <button type="button" class="remove-row-btn" disabled>✕</button>
+          </div>
+        </div>
+        <button type="button" id="add-row-btn">+ Add Track</button>
+      </section>
+
+      <!-- User Preferences Section -->
+      <section id="preferences-section">
+        <h2>Preferences</h2>
+
+        <div class="preference-group">
+          <label for="diversity-slider">Diversity</label>
+          <div class="slider-wrapper">
+            <span class="slider-label-left">More Similar</span>
+            <input
+              type="range"
+              id="diversity-slider"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0.5"
+            />
+            <span class="slider-label-right">More Diverse</span>
+          </div>
+          <output id="diversity-value">0.5</output>
+        </div>
+
+        <div class="preference-group">
+          <label for="popularity-select">Popularity</label>
+          <select id="popularity-select">
+            <option value="any" selected>Any</option>
+            <option value="obscure">Obscure</option>
+            <option value="popular">Popular</option>
+          </select>
+        </div>
+
+        <div class="preference-group">
+          <label>Tags <span class="hint">(up to 3)</span></label>
+          <div id="tag-inputs">
+            <input type="text" class="tag-input" placeholder="e.g. rock" />
+            <input type="text" class="tag-input" placeholder="e.g. 80s" />
+            <input type="text" class="tag-input" placeholder="e.g. glam rock" />
+          </div>
+        </div>
+
+        <div class="preference-group">
+          <label>Tag Match Type</label>
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                name="tag-match-type"
+                value="artist"
+                checked
+              />
+              Artist-level <span class="hint">(faster, broader)</span>
+            </label>
+            <label>
+              <input type="radio" name="tag-match-type" value="track" />
+              Track-level <span class="hint">(slower, more precise)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="preference-group">
+          <label>
+            <input type="checkbox" id="exclude-same-artist" />
+            Exclude same artist
+          </label>
+        </div>
+      </section>
+
+      <!-- Submit btn -->
+      <button type="button" id="recommend-btn">Get Recommendation</button>
+
+      <!-- Loading indicator -->
+      <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p id="loading-text">Finding your next track...</p>
+      </div>
+
+      <!-- Recommendation results section -->
+      <section id="results-section" class="hidden">
+        <h2>Your Recommendation</h2>
+
+        <div id="main-recommendation" class="recommendation-card">
+          <p class="rec-track" id="rec-track"></p>
+          <p class="rec-artist" id="rec-artist"></p>
+          <p class="rec-score">Confidence: <span id="rec-score"></span></p>
+          <a id="rec-link" href="#" target="_blank" rel="noopener"
+            >View on Last.fm</a
+          >
+        </div>
+
+        <div id="explanation-block">
+          <h3>Why this track?</h3>
+          <p id="exp-match-reason"></p>
+          <p id="exp-diversity-note"></p>
+          <p id="exp-popularity-note"></p>
+          <p id="exp-tag-match"></p>
+        </div>
+
+        <div id="top-five">
+          <h3>Top 5 Candidates</h3>
+          <ol id="top-five-list"></ol>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
