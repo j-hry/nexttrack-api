@@ -176,10 +176,10 @@ function displayResults(data) {
   const list = document.getElementById("top-five-list");
   list.innerHTML = "";
 
-  if (data.top_five) {
-    data.top_five.forEach((item) => {
+  if (data.top_5) {
+    data.top_5.forEach((item) => {
       const li = document.createElement("li");
-      li.textContent = `${item.artist} — ${item.track} (${item.score.toFixed(3)})`;
+      li.textContent = `${item.artist} — ${item.track}`;
       list.appendChild(li);
     });
   }

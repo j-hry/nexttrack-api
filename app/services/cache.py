@@ -2,6 +2,8 @@ import os
 import json
 import psycopg2
 
+CACHE_TTL_DAYS = 7
+
 
 def get_connection():
     """
@@ -32,13 +34,14 @@ def get_cached_similar(artist: str, track: str):
             SELECT similar_tracks
             FROM similar_tracks_cache 
             WHERE artist = %s AND track = %s
+            AND cached_at > NOW() - INTERVAL '%s days'
             """,
-            (artist.lower(), track.lower()),
+            (artist.lower(), track.lower(), CACHE_TTL_DAYS),
         )
         row = cur.fetchone()
         if row is not None:
-            return row[0]
-        return None
+            return row[0]  # returns [] if tags are empty
+        return None  # returns None if row does not exist
     finally:
         conn.close()
 
@@ -89,13 +92,14 @@ def get_cached_artist_tags(artist: str):
             SELECT tags
             FROM artist_tags_cache
             WHERE artist = %s
+            AND cached_at > NOW() - INTERVAL '%s days'
             """,
-            (artist.lower(),),
+            (artist.lower(), CACHE_TTL_DAYS),
         )
         row = cur.fetchone()
         if row is not None:
-            return row[0]
-        return None
+            return row[0]  # returns [] if tags are empty
+        return None  # returns None if row does not exist
     finally:
         conn.close()
 
@@ -146,8 +150,9 @@ def get_cached_track_tags(artist: str, track: str):
             SELECT tags
             FROM track_tags_cache
             WHERE artist = %s AND track = %s
+            AND cached_at > NOW() - INTERVAL '%s days'
             """,
-            (artist.lower(), track.lower()),
+            (artist.lower(), track.lower(), CACHE_TTL_DAYS),
         )
         row = cur.fetchone()
         if row is not None:

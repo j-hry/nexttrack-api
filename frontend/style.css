@@ -1,14 +1,14 @@
 /* --- CUSTOM PROPERTIES --- */
 :root {
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --bg-card: #282828;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --accent: #1db954;
-  --accent-hover: #1ed760;
-  --danger: #e74c3c;
-  --border: #333333;
+  --bg-primary: #1a1410;
+  --bg-secondary: #231e18;
+  --bg-card: #2e2620;
+  --text-primary: #e8dcc8;
+  --text-secondary: #a89880;
+  --accent: #d4874e;
+  --accent-hover: #e0995f;
+  --danger: #c45c4a;
+  --border: #3d3328;
   --radius: 8px;
   --max-width: 700px;
 }
@@ -217,6 +217,7 @@ section h3 {
 
 .tag-input {
   flex: 1;
+  min-width: 0;
   padding: 0.5rem 0.75rem;
   background-color: var(--bg-card);
   border: 1px solid var(--border);
