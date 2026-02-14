@@ -39,9 +39,9 @@ def calculate_score(
 
     # Apply diversity adjustments
     if diversity <= 0.5:
-        diversity_modifier = 1.0 + (1 - normalized_rank) * (0.5 - diversity) * 0.6
+        diversity_modifier = 1.0 + (1 - normalized_rank) * (0.5 - diversity) * 2.0
     else:
-        diversity_modifier = 1.0 + normalized_rank * (diversity - 0.5) * 0.6
+        diversity_modifier = 1.0 + normalized_rank * (diversity - 0.5) * 2.0
 
     return recency_adjusted * diversity_modifier  # final score
 
@@ -93,6 +93,9 @@ def get_recommendation(
             if key in candidate_pool:
                 candidate_pool[key]["score"] += score
                 candidate_pool[key]["appearances"] += 1
+                candidate_pool[key]["sources"].append(
+                    f"{input_track['artist']} – {input_track['track']}"
+                )
             else:
                 candidate_pool[key] = {
                     "artist": candidate["artist"]["name"],
@@ -101,6 +104,7 @@ def get_recommendation(
                     "url": candidate.get("url", ""),
                     "score": score,
                     "appearances": 1,
+                    "sources": [f"{input_track['artist']} – {input_track['track']}"],
                 }
 
     if not candidate_pool:
@@ -169,6 +173,17 @@ def get_recommendation(
                 pc_modifier = 1.0 + (1 - normalized_pc) * 0.3
 
             c["score"] *= pc_modifier
+
+    # Apply diversity-based appearance adjustment
+    if diversity > 0.5:
+        max_appearances = max(c["appearances"] for c in candidates)
+        if max_appearances > 1:
+            for c in candidates:
+                appearance_penalty = (
+                    1.0
+                    - (c["appearances"] - 1) / max_appearances * (diversity - 0.5) * 0.6
+                )
+                c["score"] *= appearance_penalty
 
     candidates.sort(key=lambda x: x["score"], reverse=True)
 

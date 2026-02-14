@@ -171,7 +171,32 @@ function displayResults(data) {
     exp.diversity_note || "";
   document.getElementById("exp-popularity-note").textContent =
     exp.popularity_note || "";
-  document.getElementById("exp-tag-match").textContent = exp.tag_match || "";
+  const matched = exp.tag_match || [];
+  const unmatched = exp.tag_unmatched || [];
+  const tagMatchType = document.querySelector(
+    'input[name="tag-match-type"]:checked',
+  ).value;
+
+  if (matched.length > 0 && unmatched.length > 0) {
+    document.getElementById("exp-tag-match").textContent =
+      "Matched " +
+      tagMatchType +
+      " tags: " +
+      matched.join(", ") +
+      ". No match for: " +
+      unmatched.join(", ");
+  } else if (matched.length > 0) {
+    document.getElementById("exp-tag-match").textContent =
+      "Matched " + tagMatchType + " tags: " + matched.join(", ");
+  } else if (unmatched.length > 0) {
+    document.getElementById("exp-tag-match").textContent =
+      "No matching " +
+      tagMatchType +
+      " tags found for: " +
+      unmatched.join(", ");
+  } else {
+    document.getElementById("exp-tag-match").textContent = "";
+  }
 
   const list = document.getElementById("top-five-list");
   list.innerHTML = "";
@@ -179,7 +204,7 @@ function displayResults(data) {
   if (data.top_5) {
     data.top_5.forEach((item) => {
       const li = document.createElement("li");
-      li.textContent = `${item.artist} — ${item.track}`;
+      li.innerHTML = `<strong>${item.track}</strong> — ${item.artist}`;
       list.appendChild(li);
     });
   }

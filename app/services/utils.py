@@ -4,10 +4,19 @@ from unidecode import unidecode
 
 def normalize_text(name: str) -> str:
     """
-    Normalize text for comparison.
+    Normalize text for internal comparison only.
 
-    Converts accented characters to ASCII equivalents, removes
-    non-alphanumeric characters, and lowercases. This ensures
-    user input like 'Beyonce' matches API responses like 'Beyoncé'.
+    Used to match user input against API responses and filter
+    duplicates (e.g. exclude_same_artist). Converts accented
+    characters to ASCII via unidecode, removes all non-alphanumeric
+    characters (spaces, apostrophes, slashes, etc.), and lowercases.
+
+    Examples:
+        'Beyoncé' → 'beyonce'
+        'AC/DC' → 'acdc'
+        'Mötley Crüe' → 'motleycrue'
+        'Guns N' Roses' → 'gunsnroses'
+
+    Not used for display or API queries.
     """
     return re.sub(r"[^a-z0-9]", "", unidecode(name).lower())

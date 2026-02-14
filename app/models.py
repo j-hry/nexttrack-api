@@ -32,6 +32,7 @@ class Explanation(BaseModel):
     diversity_note: str
     popularity_note: str
     tag_match: list[str]
+    tag_unmatched: list[str]
 
 
 class RecommendationRequest(BaseModel):

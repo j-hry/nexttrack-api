@@ -321,6 +321,7 @@ section h3 {
 .rec-track {
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--accent);
 }
 
 .rec-artist {
@@ -349,17 +350,19 @@ section h3 {
 
 /* Explanation */
 #explanation-block {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
   margin-bottom: 1.25rem;
-}
-
-#explanation-block p {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.35rem;
 }
 
 #explanation-block p:empty {
   display: none;
+}
+
+#explanation-block h3 {
+  color: var(--accent);
 }
 
 /* Top 5 list */
@@ -371,6 +374,10 @@ section h3 {
   font-size: 0.9rem;
   color: var(--text-secondary);
   padding: 0.25rem 0;
+}
+
+#top-five-list li strong {
+  color: var(--text-primary);
 }
 
 /* --- UTILITY --- */
