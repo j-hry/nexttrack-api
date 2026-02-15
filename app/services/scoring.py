@@ -1,3 +1,4 @@
+import random
 from app.services.lastfm import get_similar_tracks, get_artist_tags, get_track_tags
 from app.services.utils import normalize_text
 
@@ -53,6 +54,7 @@ def get_recommendation(
     tags: list[str] = None,
     tag_match_type: str = "artist",
     exclude_same_artist: bool = False,
+    baseline: bool = False,
 ) -> dict:
     """
     Generate recommendation from listening history.
@@ -127,6 +129,15 @@ def get_recommendation(
         candidates = [
             c for c in candidates if normalize_text(c["artist"]) not in input_artists
         ]
+
+    # Baseline mode (return random candidates for A/B testing control)
+    if baseline and candidates:
+        random.shuffle(candidates)
+        return {
+            "recommendation": candidates[0],
+            "top_5": candidates[:5],
+            "skipped_inputs": skipped,
+        }
 
     # Apply tag matching adjustment
     if tags and candidates:

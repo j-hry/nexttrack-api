@@ -25,6 +25,7 @@ def recommend(data: RecommendationRequest) -> RecommendationResponse:
         tags=data.tags,
         tag_match_type=data.tag_match_type,
         exclude_same_artist=data.exclude_same_artist,
+        baseline=data.baseline,
     )
 
     if "error" in result:

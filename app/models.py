@@ -44,6 +44,7 @@ class RecommendationRequest(BaseModel):
     tags: list[str] = Field(default=[], max_length=3)
     tag_match_type: Literal["artist", "track"] = "artist"
     exclude_same_artist: bool = False
+    baseline: bool = False
 
     @field_validator("tags")
     @classmethod
