@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from app.services.cache import (
     get_cached_similar,
@@ -11,6 +12,56 @@ from app.services.cache import (
 
 LASTFM_API_KEY = os.getenv("LASTFM_API_KEY")
 print(f"API Key loaded: {LASTFM_API_KEY is not None}")
+
+
+def lastfm_request(params: dict, context: str, max_retries: int = 1):
+    """
+    Make a request to the Last.fm API with retry logic for rate limiting.
+
+    Args:
+        params: Query parameters for the API call
+        context: Description for logging (e.g. "artist tags for 'Pink Floyd'")
+        max_retries: Number of retries on rate limit / temporary errors
+
+    Returns:
+        dict: Parsed JSON response, or None if request failed
+    """
+    url = "https://ws.audioscrobbler.com/2.0/"
+
+    for attempt in range(max_retries + 1):
+        response = requests.get(url, params=params)
+
+        if response.status_code != 200:
+            print(
+                f"Last.fm HTTP {response.status_code} ({context}): {response.text[:200]}"
+            )
+            return None
+
+        try:
+            data = response.json()
+        except requests.exceptions.JSONDecodeError:
+            print(f"Last.fm non-JSON response ({context}): {response.text[:200]}")
+            if attempt < max_retries:
+                print(f"Retrying in 1s... (attempt {attempt + 2})")
+                time.sleep(1)
+                continue
+            return None
+
+        # Check for Last.fm API-level errors
+        if "error" in data:
+            error_code = data["error"]
+            error_msg = data.get("message", "Unknown error")
+            print(f"Last.fm error {error_code} ({context}): {error_msg}")
+
+            if error_code in (11, 16, 29) and attempt < max_retries:
+                print(f"Retrying in 1s... (attempt {attempt + 2})")
+                time.sleep(1)
+                continue
+            return None
+
+        return data
+
+    return None
 
 
 def get_similar_tracks(artist: str, track: str, limit: int = 50):
@@ -36,8 +87,6 @@ def get_similar_tracks(artist: str, track: str, limit: int = 50):
     except Exception as e:
         print(f"Cache error: {e}")
 
-    # Cache miss, call Last.fm with 500 track limit for caching
-    url = "https://ws.audioscrobbler.com/2.0/"
     params = {
         "method": "track.getsimilar",
         "artist": artist,
@@ -47,8 +96,9 @@ def get_similar_tracks(artist: str, track: str, limit: int = 50):
         "limit": 500,
     }
 
-    response = requests.get(url, params=params)
-    data = response.json()
+    data = lastfm_request(params, f"similar tracks for '{artist}' - '{track}'")
+    if data is None:
+        return []
 
     if "similartracks" in data and "track" in data["similartracks"]:
         tracks = data["similartracks"]["track"]
@@ -56,7 +106,7 @@ def get_similar_tracks(artist: str, track: str, limit: int = 50):
             store_similar(artist, track, tracks)
         except Exception as e:
             print(f"Cache store error: {e}")
-        return tracks[:limit]  # return only what was requested
+        return tracks[:limit]
     return []
 
 
@@ -81,7 +131,6 @@ def get_artist_tags(artist: str) -> list:
     except Exception as e:
         print(f"Tag cache error: {e}")
 
-    url = "https://ws.audioscrobbler.com/2.0/"
     params = {
         "method": "artist.getTopTags",
         "artist": artist,
@@ -89,8 +138,9 @@ def get_artist_tags(artist: str) -> list:
         "format": "json",
     }
 
-    response = requests.get(url, params=params)
-    data = response.json()
+    data = lastfm_request(params, f"artist tags for '{artist}'")
+    if data is None:
+        return []
 
     if "toptags" in data and "tag" in data["toptags"]:
         tags = data["toptags"]["tag"]
@@ -124,7 +174,6 @@ def get_track_tags(artist: str, track: str) -> list:
     except Exception as e:
         print(f"Track tag cache error: {e}")
 
-    url = "https://ws.audioscrobbler.com/2.0/"
     params = {
         "method": "track.getTopTags",
         "artist": artist,
@@ -133,8 +182,9 @@ def get_track_tags(artist: str, track: str) -> list:
         "format": "json",
     }
 
-    response = requests.get(url, params=params)
-    data = response.json()
+    data = lastfm_request(params, f"track tags for '{artist}' - '{track}'")
+    if data is None:
+        return []
 
     if "toptags" in data and "tag" in data["toptags"]:
         tags = data["toptags"]["tag"]
