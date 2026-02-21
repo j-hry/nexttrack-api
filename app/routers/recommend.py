@@ -44,31 +44,25 @@ def recommend(data: RecommendationRequest) -> RecommendationResponse:
     # Build match reason with source tracks
     sources = top_track.get("sources", [])
     if len(sources) == 1:
-        match_reason = f"Similar to {sources[0]}"
+        match_reason = sources[0]
     else:
-        match_reason = f"Similar to {', '.join(sources[:-1])} and {sources[-1]}"
+        match_reason = f"{', '.join(sources[:-1])} and {sources[-1]}"
 
-    # Build diversity note
+    # Build diversity note (just the description)
     if data.diversity == 0.5:
-        diversity_note = (
-            "Diversity set to neutral (0.5). Results ranked by similarity only."
-        )
+        diversity_note = "neutral (results ranked by similarity only)"
     elif data.diversity < 0.5:
-        diversity_note = (
-            f"Diversity set to {data.diversity}. Favouring closely similar tracks."
-        )
+        diversity_note = f"set to {data.diversity} (favouring closely similar tracks)"
     else:
-        diversity_note = (
-            f"Diversity set to {data.diversity}. Boosting less obvious picks."
-        )
+        diversity_note = f"set to {data.diversity} (boosting less obvious picks)"
 
     # Build popularity note
     if data.popularity == "any":
-        popularity_note = "No popularity preference applied"
+        popularity_note = "no preference applied"
     elif data.popularity == "popular":
-        popularity_note = "Popular tracks boosted in ranking"
+        popularity_note = "popular tracks boosted in ranking"
     else:
-        popularity_note = "Obscure tracks boosted in ranking"
+        popularity_note = "obscure tracks boosted in ranking"
 
     # Build tag match note
     matched_tags = top_track.get("matched_tags", [])

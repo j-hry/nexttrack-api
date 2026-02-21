@@ -5,6 +5,7 @@ const recommendBtn = document.getElementById("recommend-btn");
 const loading = document.getElementById("loading");
 const loadingText = document.getElementById("loading-text");
 const resultsSection = document.getElementById("results-section");
+const resultsPlaceholder = document.getElementById("results-placeholder");
 const diversitySlider = document.getElementById("diversity-slider");
 const diversityValue = document.getElementById("diversity-value");
 
@@ -130,6 +131,7 @@ function validate(body) {
  * @param {string} tagMatchType - Either "artist" or "track".
  */
 function showLoading(tagMatchType) {
+  resultsPlaceholder.classList.add("hidden");
   loading.classList.remove("hidden");
   resultsSection.classList.add("hidden");
 
@@ -156,29 +158,72 @@ function hideLoading() {
  * @param {Object} data - The parsed JSON response from /api/v1/recommend.
  */
 function displayResults(data) {
+  resultsPlaceholder.classList.add("hidden");
+
   const rec = data.recommendation;
 
   document.getElementById("rec-track").textContent = rec.track;
   document.getElementById("rec-artist").textContent = rec.artist;
   document.getElementById("rec-score").textContent =
     data.confidence_score.toFixed(3);
-  document.getElementById("rec-link").href = rec.url;
 
+  // Build platform search URLs
+  const query = encodeURIComponent(rec.artist + " " + rec.track);
+  const platformLinks = document.getElementById("platform-links");
+  const favicon = (domain) =>
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
+  platformLinks.innerHTML = `
+    <a class="platform-btn" href="https://www.last.fm/search/tracks?q=${query}" target="_blank" rel="noopener">
+      <img src="${favicon("last.fm")}" alt="" width="16" height="16">
+      Last.fm
+    </a>
+    <a class="platform-btn" href="https://open.spotify.com/search/${query}" target="_blank" rel="noopener">
+      <img src="${favicon("spotify.com")}" alt="" width="16" height="16">
+      Spotify
+    </a>
+    <a class="platform-btn" href="https://www.youtube.com/results?search_query=${query}" target="_blank" rel="noopener">
+      <img src="${favicon("youtube.com")}" alt="" width="16" height="16">
+      YouTube
+    </a>
+    <a class="platform-btn" href="https://music.apple.com/us/search?term=${query}" target="_blank" rel="noopener">
+      <img src="${favicon("music.apple.com")}" alt="" width="16" height="16">
+      Apple Music
+    </a>
+  `;
+
+  // Build explanation bullet points
   const exp = data.explanation;
-  document.getElementById("exp-match-reason").textContent =
-    exp.match_reason || "";
-  document.getElementById("exp-diversity-note").textContent =
-    exp.diversity_note || "";
-  document.getElementById("exp-popularity-note").textContent =
-    exp.popularity_note || "";
+  const explanationList = document.getElementById("explanation-list");
+  const bullets = [];
+
+  if (exp.match_reason) {
+    bullets.push(
+      `<span class="param-label">Similar to:</span> ${exp.match_reason}`,
+    );
+  }
+
+  if (exp.diversity_note) {
+    bullets.push(
+      `<span class="param-label">Diversity:</span> ${exp.diversity_note}`,
+    );
+  }
+
+  if (exp.popularity_note) {
+    bullets.push(
+      `<span class="param-label">Popularity:</span> ${exp.popularity_note}`,
+    );
+  }
+
   const matched = exp.tag_match || [];
   const unmatched = exp.tag_unmatched || [];
   const tagMatchType = document.querySelector(
     'input[name="tag-match-type"]:checked',
   ).value;
 
+  let tagText = "";
   if (matched.length > 0 && unmatched.length > 0) {
-    document.getElementById("exp-tag-match").textContent =
+    tagText =
       "Matched " +
       tagMatchType +
       " tags: " +
@@ -186,17 +231,20 @@ function displayResults(data) {
       ". No match for: " +
       unmatched.join(", ");
   } else if (matched.length > 0) {
-    document.getElementById("exp-tag-match").textContent =
-      "Matched " + tagMatchType + " tags: " + matched.join(", ");
+    tagText = "Matched " + tagMatchType + " tags: " + matched.join(", ");
   } else if (unmatched.length > 0) {
-    document.getElementById("exp-tag-match").textContent =
+    tagText =
       "No matching " +
       tagMatchType +
       " tags found for: " +
       unmatched.join(", ");
-  } else {
-    document.getElementById("exp-tag-match").textContent = "";
   }
+
+  if (tagText) {
+    bullets.push(`<span class="param-label">Tags:</span> ${tagText}`);
+  }
+
+  explanationList.innerHTML = bullets.map((b) => `<li>${b}</li>`).join("");
 
   const list = document.getElementById("top-five-list");
   list.innerHTML = "";

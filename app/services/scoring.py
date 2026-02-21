@@ -96,7 +96,7 @@ def get_recommendation(
                 candidate_pool[key]["score"] += score
                 candidate_pool[key]["appearances"] += 1
                 candidate_pool[key]["sources"].append(
-                    f"{input_track['artist']} – {input_track['track']}"
+                    f"{input_track['track']} by {input_track['artist']}"
                 )
             else:
                 candidate_pool[key] = {
@@ -106,7 +106,7 @@ def get_recommendation(
                     "url": candidate.get("url", ""),
                     "score": score,
                     "appearances": 1,
-                    "sources": [f"{input_track['artist']} – {input_track['track']}"],
+                    "sources": [f"{input_track['track']} by {input_track['artist']}"],
                 }
 
     if not candidate_pool:
