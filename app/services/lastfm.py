@@ -14,7 +14,7 @@ LASTFM_API_KEY = os.getenv("LASTFM_API_KEY")
 print(f"API Key loaded: {LASTFM_API_KEY is not None}")
 
 
-def lastfm_request(params: dict, context: str, max_retries: int = 1):
+def lastfm_request(params: dict, context: str, max_retries: int = 2):
     """
     Make a request to the Last.fm API with retry logic for rate limiting.
 
@@ -35,6 +35,10 @@ def lastfm_request(params: dict, context: str, max_retries: int = 1):
             print(
                 f"Last.fm HTTP {response.status_code} ({context}): {response.text[:200]}"
             )
+            if response.status_code == 502 and attempt < max_retries:
+                print(f"Retrying in 1s... (attempt {attempt + 2})")
+                time.sleep(1)
+                continue
             return None
 
         try:
